@@ -49,7 +49,7 @@ const Today = () => {
           <Text style={styles.text}>{`Sunset: ${formatTime(weatherData.sys.sunset)}`}</Text>
         </>
       ) : (
-        <Text style={styles.text}>Weather data not available</Text>
+        <Text style={styles.text}>Weather Data not available</Text>
       )}
     </View>
   );
