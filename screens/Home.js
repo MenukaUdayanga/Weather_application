@@ -1,44 +1,81 @@
-import React from 'react';
-import { View, Text, ImageBackground, StyleSheet } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
+import axios from 'axios';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-export default function Home() {
+export default function Home({navigation}) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const getCate = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetching data from the API
+        const response = await axios.get('https://api.thecatapi.com/v1/breeds');
+        setData(response.data);
+        console.log('Data fetched successfully');
+      } catch (error) {
+        setError(error.message || 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getCate();
+  }, []);
+
+  const renderCate = ({item}) => (
+    <TouchableOpacity
+      style={styles.touchable}
+      onPress={() => navigation.navigate('Cate Details', {itemId: item.id})}>
+      <Text style={styles.cateName}>{item.name}</Text>
+      <Text style={styles.arrIcon}>
+        <Icon name="arrow-right" size={20} color="black" />
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require('../images/1.jpg')}
-        style={styles.backgroundImage}
-      >
-        <View>
-          <Text style={styles.title}>Welcome to App</Text>
-          <Text style={styles.subtitle}>Explore the amazing features!</Text>
-        </View>
-      </ImageBackground>
+    <View>
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      {error && <Text>Error: {error}</Text>}
+      {data.length > 0 && (
+        <FlatList
+          data={data}
+          renderItem={renderCate}
+          keyExtractor={item => item.id}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
+  touchable: {
+    backgroundColor: '#acdee3',
+    padding: 10,
+    margin: 5,
+    flexDirection: 'row',
     alignItems: 'center',
+    height: 60,
   },
-  title: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
+  cateName: {
+    color: 'black',
+    fontSize: 17,
   },
-  subtitle: {
-    color: 'white',
-    fontSize: 16,
-    marginTop: 10,
+  arrIcon: {
+    position: 'absolute',
+    right: 10,
   },
 });
